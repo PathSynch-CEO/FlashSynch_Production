@@ -15,6 +15,8 @@ import CardEditor from './pages/dashboard/CardEditor'
 import Contacts from './pages/dashboard/Contacts'
 import Analytics from './pages/dashboard/Analytics'
 import Settings from './pages/dashboard/Settings'
+import Team from './pages/dashboard/Team'
+import AcceptInvite from './pages/AcceptInvite'
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
         <Route path="/c/:slug" element={<CardPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/invite/:token" element={<AcceptInvite />} />
 
         {/* Dashboard routes */}
         <Route
@@ -82,6 +85,16 @@ function App() {
             <ProtectedRoute>
               <DashboardLayout>
                 <Settings />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/team"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Team />
               </DashboardLayout>
             </ProtectedRoute>
           }

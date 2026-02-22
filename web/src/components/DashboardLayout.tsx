@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   ChevronDown,
-  User
+  User,
+  Building
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Cards', href: '/dashboard', icon: CreditCard },
   { name: 'Contacts', href: '/dashboard/contacts', icon: Users },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { name: 'Team', href: '/dashboard/team', icon: Building },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 

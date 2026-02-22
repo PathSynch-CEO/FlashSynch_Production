@@ -4,6 +4,7 @@ import cardsRoutes from './cards.js';
 import contactsRoutes from './contacts.js';
 import analyticsRoutes from './analytics.js';
 import webhooksRoutes from './webhooks.js';
+import orgsRoutes from './orgs.js';
 
 const router = Router();
 
@@ -21,6 +22,9 @@ router.use('/contacts', contactsRoutes); // For /contacts
 // Analytics routes
 router.use('/cards', analyticsRoutes); // For /cards/:slug/scan
 router.use('/analytics', analyticsRoutes); // For /analytics/:cardId
+
+// Organization routes
+router.use('/orgs', orgsRoutes);
 
 // Webhooks routes
 router.use('/webhooks', webhooksRoutes);
