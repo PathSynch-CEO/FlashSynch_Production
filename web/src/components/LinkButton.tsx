@@ -78,10 +78,9 @@ export default function LinkButton({ link, primaryColor, onTrack }: LinkButtonPr
         className="flex items-center justify-center w-10 h-10 rounded-lg"
         style={{ backgroundColor: `${primaryColor}20` }}
       >
-        <Icon
-          className="w-5 h-5"
-          style={{ color: primaryColor }}
-        />
+        <span style={{ color: primaryColor }}>
+          <Icon className="w-5 h-5" />
+        </span>
       </div>
 
       <div className="flex-1 text-left">

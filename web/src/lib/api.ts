@@ -25,3 +25,5 @@ export async function trackScan(slug: string, eventType: string, linkId?: string
     linkId,
   });
 }
+
+export default api;

@@ -96,6 +96,103 @@ router.post('/:slug/scan', async (req: Request, res: Response): Promise<void> =>
 });
 
 /**
+ * GET /api/analytics/aggregate
+ * Get aggregated analytics across all user's cards
+ */
+router.get('/aggregate', requireAuth, async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'User not found', code: 'USER_NOT_FOUND' });
+      return;
+    }
+
+    // Parse date filter
+    const startDate = req.query.startDate
+      ? new Date(req.query.startDate as string)
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default 30 days
+
+    // Get all user's cards
+    const userCards = await Card.find({ userId: req.user._id, status: 'active' });
+    const cardIds = userCards.map((c) => c._id);
+
+    if (cardIds.length === 0) {
+      res.json({
+        data: {
+          views: 0,
+          clicks: 0,
+          captures: 0,
+          shares: 0,
+          viewsByDay: [],
+          topCards: [],
+        },
+      });
+      return;
+    }
+
+    // Aggregate totals
+    const totals = userCards.reduce(
+      (acc, card) => ({
+        views: acc.views + (card.analytics?.totalViews || 0),
+        clicks: acc.clicks + (card.analytics?.totalClicks || 0),
+        captures: acc.captures + (card.analytics?.totalCaptures || 0),
+      }),
+      { views: 0, clicks: 0, captures: 0 }
+    );
+
+    // Count shares
+    const sharesCount = await Scan.countDocuments({
+      cardId: { $in: cardIds },
+      eventType: 'share',
+    });
+
+    // Views by day
+    const viewsByDay = await Scan.aggregate([
+      {
+        $match: {
+          cardId: { $in: cardIds },
+          eventType: 'view',
+          timestamp: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Top cards by views
+    const topCards = userCards
+      .map((card) => ({
+        cardId: card._id.toString(),
+        cardName: `${card.profile.firstName} ${card.profile.lastName}`,
+        views: card.analytics?.totalViews || 0,
+      }))
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 5);
+
+    res.json({
+      data: {
+        views: totals.views,
+        clicks: totals.clicks,
+        captures: totals.captures,
+        shares: sharesCount,
+        viewsByDay: viewsByDay.map((v) => ({
+          date: v._id,
+          count: v.count,
+        })),
+        topCards,
+      },
+    });
+  } catch (error) {
+    console.error('Get aggregate analytics error:', error);
+    res.status(500).json({ error: 'Failed to get analytics', code: 'GET_ANALYTICS_ERROR' });
+  }
+});
+
+/**
  * GET /api/analytics/:cardId
  * Get aggregated analytics for a card
  */

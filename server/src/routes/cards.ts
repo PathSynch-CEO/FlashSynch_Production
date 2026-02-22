@@ -100,6 +100,38 @@ router.get('/', requireAuth, async (req: Request, res: Response): Promise<void> 
 });
 
 /**
+ * GET /api/cards/id/:id
+ * Get card by ID for editing (PRIVATE - auth required)
+ * Does NOT increment view count
+ */
+router.get('/id/:id', requireAuth, async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'User not found', code: 'USER_NOT_FOUND' });
+      return;
+    }
+
+    const { id } = req.params;
+    const card = await Card.findById(id);
+
+    if (!card) {
+      res.status(404).json({ error: 'Card not found', code: 'CARD_NOT_FOUND' });
+      return;
+    }
+
+    if (card.userId.toString() !== req.user._id) {
+      res.status(403).json({ error: 'Not authorized to view this card', code: 'FORBIDDEN' });
+      return;
+    }
+
+    res.json({ data: card.toObject() });
+  } catch (error) {
+    console.error('Get card by ID error:', error);
+    res.status(500).json({ error: 'Failed to get card', code: 'GET_CARD_ERROR' });
+  }
+});
+
+/**
  * GET /api/cards/:slug
  * Get card by slug (PUBLIC - no auth required)
  * Increments view count
