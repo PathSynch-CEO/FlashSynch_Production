@@ -2,9 +2,10 @@ module.exports = {
   apps: [
     {
       name: 'flashsynch-api',
-      script: 'dist/index.js',
-      instances: 'max',
-      exec_mode: 'cluster',
+      script: 'node_modules/.bin/tsx',
+      args: 'src/index.ts',
+      instances: 1,
+      exec_mode: 'fork',
       env: {
         NODE_ENV: 'development',
         PORT: 3000,
