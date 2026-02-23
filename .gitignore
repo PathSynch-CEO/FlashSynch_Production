@@ -5,10 +5,17 @@ node_modules/
 dist/
 *.js.map
 
-# Environment files
+# Environment files (contain secrets!)
 .env
 .env.local
 .env.*.local
+.env.production
+server/.env
+server/.env.production
+web/.env.production
+
+# Logs
+logs/
 
 # Firebase credentials (never commit!)
 firebase-service-account.json

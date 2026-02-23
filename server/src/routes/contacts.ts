@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { Card, Contact } from '../models/index.js';
+import { Card, Contact, User } from '../models/index.js';
 import { requireAuth } from '../middleware/auth.js';
+import { sendLeadNotificationEmail } from '../services/email.js';
 import {
   leadCaptureSchema,
   updateContactSchema,
@@ -79,6 +80,20 @@ router.post('/:slug/capture', async (req: Request, res: Response): Promise<void>
     await Card.findByIdAndUpdate(card._id, {
       $inc: { 'analytics.totalCaptures': 1 },
     });
+
+    // Send email notification to card owner
+    const cardOwner = await User.findById(card.userId);
+    if (cardOwner?.email) {
+      await sendLeadNotificationEmail({
+        to: cardOwner.email,
+        cardOwnerName: cardOwner.displayName,
+        leadName: input.name,
+        leadEmail: input.email,
+        leadPhone: input.phone,
+        leadCompany: input.company,
+        cardName: `${card.profile.firstName} ${card.profile.lastName}`,
+      });
+    }
 
     res.status(201).json({
       data: {

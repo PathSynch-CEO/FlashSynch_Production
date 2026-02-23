@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Org, User, Card, Invitation } from '../models/index.js';
 import { requireAuth } from '../middleware/auth.js';
+import { sendInviteEmail } from '../services/email.js';
 import crypto from 'crypto';
 import mongoose from 'mongoose';
 
@@ -243,7 +244,15 @@ router.post('/:id/invitations', requireAuth, async (req: Request, res: Response)
 
     await invitation.save();
 
-    // TODO: Send invitation email
+    // Send invitation email
+    const inviter = await User.findById(req.user._id);
+    await sendInviteEmail({
+      to: email.toLowerCase(),
+      inviterName: inviter?.displayName || 'A team member',
+      orgName: org.name,
+      role: invitation.role,
+      inviteToken: token,
+    });
 
     res.status(201).json({
       data: {
